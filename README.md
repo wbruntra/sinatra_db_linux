@@ -1,60 +1,66 @@
 # Running the application in Ubuntu
 
 ### Preliminary
-First, make sure postgresql is installed on the system:
+If you are starting from scratch on Ubuntu, you will need to get Ruby and bundler on your system.
+```sh
+sudo apt-get install ruby ruby-dev
+sudo apt-get install bundler
+```
+
+You'll also need postgresql:
 ```sh
 sudo apt-get install postgresql postgresql-contrib
+sudo apt-get install libpq-dev
 ```
-Next, get all the gems for the project:
+All the gems for this project should install without issue:
 ```sh
-sudo gem install bundler
 bundle update
 ```
 
 ### Postgres Settings
-We need to configure some postgresql settings before our application will be allowed to do anything with this database.
+Normally, the two commands we use to create and drop databases are:
 ```sh
-sudo gedit /etc/postgresql/9.3/main/pg_hba.conf
+rake db:create
+rake db:drop
 ```
-In this file, look for and change "md5" to "trust" at end of some lines.
-
-Next, we need to set a password for the "postgres" user.
-
-The default password for this app is 'dummy', which can be found in:
-  - database.yaml file (line 5)
-  - database.rb file (line 26)
-
-Change those files if you want to.
-Then, in terminal, type:
+But postgres will not allow us to run those commands, since the only postgres user allowed to create or drop databases is named "postgres". To run those commands under the name "postgres", you instead enter
+```sh
+sudo -u postgres rake db:create
+sudo -u postgres rake db:drop
+```
+Run the first of those commands will create the database our app will use. However, it still needs permission to run migrations and seed data, so we will do this in the postgres shell by typing
 ```sh
 sudo -u postgres psql
 ```
+We need to set a password for the "postgres" user which our app will use.
 
-Which puts you inside the psql shell. Enter:
+The default password for the app uses is 'dummy', which can be found in:
+  - config/database.rb (line 26)
 
+Change that line if you want to. Then, in the shell, type
 ```sh
 ALTER USER postgres PASSWORD 'dummy';
 ```
-
-You will receive confirmation message 'ALTER ROLE'
-
-Exit psql shell with
-
+(Replace 'dummy' with your new password if you've changed it). Quit the shell with
 ```sh
 \q
 ```
-
 And you should now be able to access and edit the database.
 
 ### Final
-In project folder:
+Test whether everything is working by running:
 ```sh
-rake db:create
+sudo -u postgres rake db:create
 rake db:migrate
 rake db:seed
 ```
 
-And if everything is working as it should:
+Then:
 ```sh
 shotgun config.ru
 ```
+If everything worked, shotgun will have started a server at
+```sh
+http://localhost:9393
+```
+from which you can see all the existing Model entries as well as create new ones.
