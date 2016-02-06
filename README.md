@@ -23,17 +23,18 @@ Normally, the two commands we use to create and drop databases are:
 rake db:create
 rake db:drop
 ```
-But postgres will not allow us to run those commands, since the only postgres user allowed to create or drop databases is named "postgres". To run those commands under the name "postgres", you instead enter
+But running those commands gives an error, since we are running it under our own username while we _should_ be running it under the name "postgres". So, just enter
 ```sh
 sudo -u postgres rake db:create
-sudo -u postgres rake db:drop
 ```
-Run the first of those commands will create the database our app will use. However, it still needs permission to run migrations and seed data, so we will do this in the postgres shell by typing
+Which will create the database our app uses. However, if we try to run
+```sh
+rake db:migrate
+```
+we will get a different error about needing a password. We'll create a password under the postgres shell by typing
 ```sh
 sudo -u postgres psql
 ```
-We need to set a password for the "postgres" user which our app will use.
-
 The default password for the app uses is 'dummy', which can be found in:
   - config/database.rb (line 26)
 
@@ -48,7 +49,7 @@ ALTER USER postgres PASSWORD 'dummy';
 And you should now be able to access and edit the database.
 
 ### Final
-Test whether everything is working by running:
+If everything is working correctly you can run:
 ```sh
 sudo -u postgres rake db:create
 rake db:migrate
@@ -59,8 +60,8 @@ Then:
 ```sh
 shotgun config.ru
 ```
-If everything worked, shotgun will have started a server at
+The server at
 ```sh
 http://localhost:9393
 ```
-from which you can see all the existing Model entries as well as create new ones.
+will then allow you to see all the existing Model entries as well as create new ones.
