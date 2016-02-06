@@ -2,5 +2,5 @@ development:
   adapter: postgresql
   database: development
   username: postgres
-  password: dummy
+  password: nopw
   host: localhost
